@@ -9,8 +9,22 @@
  
 ## Usage
   ```bash
-  ./fuzzer URL
+  ./Wuzzer URL
   ```
+
+## Test on [DVWA Docker](https://hub.docker.com/r/vulnerables/web-dvwa/)  
+  + Run image
+    ```bash
+    docker run --rm -it -p 80:80 vulnerables/web-dvwa
+    ```
+  + Database Setup
+    > http://127.0.0.1/setup.php
+  + Login with default credentials
+    - Username: **admin**
+    - Password: **password**
+  + XSS (Reflected)
+    > http://127.0.0.1/vulnerabilities/xss_r/?name=payload#
+
 
 ## Related Link 
 ### Vulnerable Web Applications
