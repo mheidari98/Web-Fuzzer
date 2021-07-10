@@ -22,16 +22,15 @@ RED = colorama.Fore.RED
 
 class Injection:
 
-    def __init__(self, session, payloadPath, urls, attack):
+    def __init__(self, session, urls, attack):
         self.session = session
-        self.payloads = self.Get_payloads(payloadPath)
         self.urls = urls
         self.attack = attack
 
     def PrintErr(self, err_msg, payload, url):
-        print( f"{RED} \t Error :  {err_msg} {RESET}")
-        print( f"{GRAY} \t Vulnerable Input :  {payload} {RESET}")
-        print( f"{YELLOW} \t {url} {RESET}")
+        print( f"{RED} \tError :  {err_msg} {RESET}")
+        print( f"{GRAY} \tVulnerable Input :  {payload} {RESET}")
+        print( f"{YELLOW} \t{url} {RESET}")
 
     def fuzz(self, url, form):
         formMethod = form.get('method')    # post / GET  
@@ -42,10 +41,9 @@ class Injection:
         formInputs = form.find_all('input')
         formSelects = form.find_all('select')
         formInputs = formInputs + formSelects
-        
 
         href = urljoin(url, formAction) 
-        print('\t' + href)
+        print(f"\thref = {href}")
 
         params={}
         for j, formInput in enumerate(formInputs):
@@ -60,11 +58,8 @@ class Injection:
         
         for inputName, inputValue in params.items():
             if not inputValue:
-                for payload, NewParams in self.InjectedPayload(params, inputName):
-                    if self.CheckFault(href, NewParams, formMethod, payload) :
-                        self.PrintErr( self.attack , payload, url)
-                        return True
-        return False
+                self.PayloadInjection(self, params, inputName, href, formMethod)
+
 
     def Fuzzer(self):
         for url in self.urls :
@@ -110,12 +105,8 @@ class Injection:
         url_parts[4] = urlencode(query)
         return urlunparse(url_parts)
 
-    def InjectedPayload(self, params, inputName):
-        paramsCopy = params
-        for payload in self.payloads:
-            paramsCopy[inputName] = payload
-            #new_URL = add_url_params(href, params)
-            yield payload, paramsCopy
+    def PayloadInjection(self, *arg):
+	pass
 
     def CheckFault(self, *arg):
         pass
