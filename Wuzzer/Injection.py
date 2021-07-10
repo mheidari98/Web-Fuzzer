@@ -1,4 +1,5 @@
 import re
+from sys import dllhandle
 import time
 from bs4.builder import FAST
 import requests
@@ -12,6 +13,13 @@ except: # For Python 3
     import urllib
     from urllib.parse import urlparse, urlunparse, urljoin, urlencode, parse_qsl
 
+# init the colorama module
+colorama.init()
+GREEN = colorama.Fore.GREEN
+GRAY = colorama.Fore.LIGHTBLACK_EX
+RESET = colorama.Fore.RESET
+YELLOW = colorama.Fore.YELLOW
+RED = colorama.Fore.GREEN
 
 class Injection:
     def __init__(self, session, payloadPath, urls, attack):
@@ -19,6 +27,44 @@ class Injection:
         self.payloads = self.Get_payloads(payloadPath)
         self.urls = urls
         self.attack = attack
+
+    def PrintErr(self, err_msg, payload, url):
+        print(RED, '\tError : ', err_msg)
+        print(RED, '\tVulnerable Input :', payload)
+        print('\t' + url)
+
+    def fuzz(self, url, form):
+        formMethod = form.get('method')    # post / GET  
+        formAction = form.get('action')    # login.php  
+        print(f"\tmethod = {formMethod}")
+        print(f"\taction = {formAction}")
+
+        formInputs = form.find_all('input')
+        formSelects = form.find_all('select')
+        formInputs = formInputs + formSelects
+        
+
+        href = urljoin(url, formAction) 
+        print('\t' + href)
+
+        params={}
+        for j, formInput in enumerate(formInputs):
+            inputType = formInput.get('type') 
+            inputName = formInput.get('name')
+            inputValue = formInput.get('value')
+
+            if inputType in ['submit', 'hidden']:
+                params[inputName] = inputValue
+            elif inputName != None:
+                params[inputName] = ''
+        
+        for inputName, inputValue in params.items():
+            if not inputValue:
+                for payload, NewParams in self.InjectedPayload(params, inputName):
+                    if self.CheckFault(payload) :
+                        self.PrintErr( self.attack , payload, url)
+                        return True
+        return False
 
     def Fuzzer(self):
         for url in self.urls :
@@ -28,37 +74,8 @@ class Injection:
 
             for i, form in enumerate(forms): 
                 print(f"[-] Form ({i}) in {url}")
-
-                formMethod = form.get('method')    # post / GET  
-                formAction = form.get('action')    # login.php  
-                print(f"\tmethod = {formMethod}")
-                print(f"\taction = {formAction}")
-
-                formInputs = form.find_all('input')
-                formSelects = form.find_all('select')
-                formInputs = formInputs + formSelects
+                self.fuzz(url, form)
                 
-
-                href = urljoin(url, formAction) 
-                print('\t' + href)
-
-                params={}
-                for j, formInput in enumerate(formInputs):
-                    inputType = formInput.get('type') 
-                    inputName = formInput.get('name')
-                    inputValue = formInput.get('value')
-
-                    if inputType in ['submit', 'hidden']:
-                        params[inputName] = inputValue
-                    elif inputName != None:
-                        params[inputName] = ''
-                
-                for inputName, inputValue in params.items():
-                    if not inputValue:
-                        for payload, NewParams in self.InjectedPayload(params, inputName):
-                            if self.CheckFault(payload) :
-                                print("YES!!!")
-
 
     def send_request(self, url, payload, method):
         if method.upper()  == "GET":
