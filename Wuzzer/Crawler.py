@@ -11,6 +11,7 @@
 
 import re
 import requests
+import os
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 import urllib
@@ -147,6 +148,10 @@ class Crawler:
         print("[+] Total crawled URLs:", max_urls)
 
         domain_name = urlparse(self.url).netloc
+
+        # https://stackoverflow.com/questions/273192
+        os.makedirs("Crawled", exist_ok=True) 
+
         # save the internal links to a file
         with open(f"Crawled/{domain_name}_internal_links.txt", "w") as f:
             for internal_link in self.internal_urls:
@@ -156,4 +161,5 @@ class Crawler:
         with open(f"Crawled/{domain_name}_external_links.txt", "w") as f:
             for external_link in self.external_urls:
                 print(external_link.strip(), file=f)
-        return self.internal_urls
+
+        return self.internal_urls - {self.loginURL, self.logoutURL}
