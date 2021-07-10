@@ -122,7 +122,6 @@ class Crawler:
             
         return urls
 
-
     def RecCrawl(self, url, max_urls=30, DynamicSite=0, verbose=False):
         """
         Crawls a web page and extracts all links.

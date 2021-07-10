@@ -12,23 +12,32 @@
 #!/usr/bin/env python
 
 from Crawler import *
+from XssInjection import *
 
-def login(session, loginURL, payload):
-    r = session.get( loginURL )
-    signin = BeautifulSoup( r.content , "html5lib")
+def Login(session, login_url, payload, isDVWA = False):
+    r = session.get(login_url)
+
+    if isDVWA :
+        session.cookies.set('security', 'low', domain=urlparse(login_url).netloc, path='')
     
+    signin = BeautifulSoup( r.content , "html5lib")
+    loginforms = signin.find('form')
     try:
-        payload['user_token'] = signin.find('input', attrs={"name" : "user_token"} )['value']
+        hiddenInput = loginforms.find_all('input', attrs={"type" : "hidden"} )
+        for hr in hiddenInput:
+            payload[ hr['name'] ] = hr['value']
     except:
         pass
 
-    p = session.post( loginURL, data=payload )
+    p = session.post(login_url, data=payload)
+    return p.url
 
-def SessionCreator(loginURL, payload={}):
-    s = requests.Session()
+def Session_Creator(login_url, payload={}):
+    s = requests.session()
     # s.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36"
-    login( s, loginURL, payload )
-    return s
+    protected_url = Login(s, login_url, payload)
+    return (s, protected_url)
+
 
 def main():
     """import argparse
@@ -40,7 +49,6 @@ def main():
     url = args.url
     max_urls = args.max_urls """
 
-    protectedURL = "http://127.0.0.1/index.php" 
     loginURL  = "http://127.0.0.1/login.php"
     logoutURL = "http://127.0.0.1/logout.php"
 
@@ -51,10 +59,11 @@ def main():
         'Login': 'Login'
     }
 
-    Session = SessionCreator(loginURL, payload)
+    Session, protectedURL = Session_Creator(loginURL, payload)
 
     internal_urls = Crawler(Session, protectedURL, loginURL, logoutURL).crawl(max_urls=30, DynamicSite=0, verbose=False)
 
+    XssInjection(Session, "./payload/xss-payload-list.txt", internal_urls)
     
 if __name__ == '__main__':
     main()
