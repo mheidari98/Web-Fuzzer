@@ -27,6 +27,7 @@ class Injection:
         self.payloads = self.Get_payloads(payloadPath)
         self.urls = urls
         self.attack = attack
+        print(f"{attack}")
 
     def PrintErr(self, err_msg, payload, url):
         print( f"{RED} \t Error :  {err_msg} {RESET}")
