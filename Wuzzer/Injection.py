@@ -1,5 +1,4 @@
 import re
-from sys import dllhandle
 import time
 from bs4.builder import FAST
 import requests
@@ -19,9 +18,10 @@ GREEN = colorama.Fore.GREEN
 GRAY = colorama.Fore.LIGHTBLACK_EX
 RESET = colorama.Fore.RESET
 YELLOW = colorama.Fore.YELLOW
-RED = colorama.Fore.GREEN
+RED = colorama.Fore.RED
 
 class Injection:
+
     def __init__(self, session, payloadPath, urls, attack):
         self.session = session
         self.payloads = self.Get_payloads(payloadPath)
@@ -29,9 +29,9 @@ class Injection:
         self.attack = attack
 
     def PrintErr(self, err_msg, payload, url):
-        print(RED, '\tError : ', err_msg)
-        print(RED, '\tVulnerable Input :', payload)
-        print('\t' + url)
+        print( f"{RED} \t Error :  {err_msg} {RESET}")
+        print( f"{GRAY} \t Vulnerable Input :  {payload} {RESET}")
+        print( f"{YELLOW} \t {url} {RESET}")
 
     def fuzz(self, url, form):
         formMethod = form.get('method')    # post / GET  
@@ -61,7 +61,7 @@ class Injection:
         for inputName, inputValue in params.items():
             if not inputValue:
                 for payload, NewParams in self.InjectedPayload(params, inputName):
-                    if self.CheckFault(payload) :
+                    if self.CheckFault(href, NewParams, formMethod, payload) :
                         self.PrintErr( self.attack , payload, url)
                         return True
         return False
