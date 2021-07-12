@@ -5,21 +5,28 @@ import requests
 import random
 from bs4 import BeautifulSoup
 import colorama
-import pandas 
+import pandas as pd
+from json import dumps
 try:
-    import urlparse
-    from urllib import urlencode
-except: # For Python 3
-    import urllib
-    from urllib.parse import urlparse, urlunparse, urljoin, urlencode, parse_qsl
-
-# init the colorama module
-colorama.init()
+    from urllib import urlencode, unquote
+    from urlparse import urlparse, parse_qsl, ParseResult
+except ImportError:
+    # Python 3 fallback
+    from urllib.parse import urlunparse, urljoin, urlencode, unquote, urlparse, parse_qsl, ParseResult
+    
+# https://pypi.org/project/colorama/
+colorama.init()     # init the colorama module
 GREEN = colorama.Fore.GREEN
 GRAY = colorama.Fore.LIGHTBLACK_EX
 RESET = colorama.Fore.RESET
 YELLOW = colorama.Fore.YELLOW
 RED = colorama.Fore.RED
+BLACK = colorama.Fore.BLACK
+BLUE = colorama.Fore.BLUE
+MAGENTA = colorama.Fore.MAGENTA
+CYAN = colorama.Fore.CYAN
+WHITE = colorama.Fore.WHITE
+
 
 class Injection:
 
@@ -28,51 +35,54 @@ class Injection:
         self.urls = list(urls)
         self.attack = attack
 
-    def PrintErr(self, err_msg, payload, url):
-        print( f"{RED} \tError :  {err_msg} {RESET}")
-        print( f"{GRAY} \tVulnerable Input :  {payload} {RESET}")
-        print( f"{YELLOW} \t{url} {RESET}")
+    def PrintErr(self, err_msg, url, selected_input, payload):
+        print( f"{RED}[+] Error :  {err_msg} at {url}{RESET}")
+        print( f"{GRAY} \t InputName={GREEN}{selected_input}{GRAY} with value={GREEN}{payload} {RESET}")
+        print()
 
-    def fuzz(self, url, form):
-        formMethod = form.get('method')    # post / GET  
-        formAction = form.get('action')    # login.php  
-        print(f"\tmethod = {formMethod}")
-        print(f"\taction = {formAction}")
-
-        formInputs = form.find_all('input')
-        formSelects = form.find_all('select')
-        formTextarea = form.find_all('textarea')
-        formInputs = formInputs + formSelects + formTextarea
-
-        href = urljoin(url, formAction) 
-        print(f"\thref = {href}")
-
-        params = pandas.DataFrame(columns = ['type', 'name', 'value'])
-                        
+    def addInputs(self, df, formInputs, tag):
         SubmitExistence = False
-        Cnt = 0
         for j, formInput in enumerate(formInputs):
-            
             tmptype  = formInput.get('type') 
             tmpname  = formInput.get('name')
             tmpvalue = formInput.get('value')
 
             if tmptype == 'submit':
                 if SubmitExistence == False:
-                    params.loc[Cnt] = [tmptype, tmpname, tmpvalue]
+                    # https://stackoverflow.com/questions/10715965/
+                    df.loc[0 if pd.isnull(df.index.max()) else df.index.max() + 1] = [tmptype, tmpname, tmpvalue, tag]  
                     SubmitExistence = True
-                    Cnt += 1
-
-                else: continue
-
+                else: 
+                    continue
             elif tmptype == 'hidden':
-                params.loc[Cnt] = [tmptype, tmpname, tmpvalue]
-                Cnt += 1
+                df.loc[0 if pd.isnull(df.index.max()) else df.index.max() + 1] = [tmptype, tmpname, tmpvalue, tag]
 
             elif tmpname != None:
-                params.loc[Cnt] = [tmptype, tmpname, '']
-                Cnt += 1
+                df.loc[0 if pd.isnull(df.index.max()) else df.index.max() + 1] = [tmptype, tmpname, '', tag]
 
+
+    def fuzz(self, url, form):
+        formMethod = form.get('method')    # post / GET  
+        formAction = form.get('action')    # login.php  
+        print(f"{CYAN}\tmethod = {formMethod}\taction = {formAction}{RESET}")
+
+        href = urljoin(url, formAction) 
+
+        params = pd.DataFrame(columns = ['type', 'name', 'value', 'tag'])
+        
+        formInputs = [i for i in form.find_all('input') if i.get('type')!='checkbox']
+        self.addInputs(params, formInputs, 'input')
+
+        formInputs = form.find_all('select')
+        self.addInputs(params, formInputs, 'select')
+
+        formInputs = form.find_all('textarea')
+        self.addInputs(params, formInputs, 'textarea')
+
+        formInputs = [i for i in form.find_all('button') if i.get('type').lower()=='submit']
+        self.addInputs(params, formInputs, 'button')
+        
+        #print(params)
         for i in range(len(params)):
             if not params.loc[i, 'value']:
                 fault = self.PayloadInjection(params, i, url, href, formMethod)
@@ -85,7 +95,7 @@ class Injection:
             forms = soup.find_all('form')
 
             for i, form in enumerate(forms): 
-                print(f"[-] Form ({i}) in {url}")
+                print(f"{BLUE}[-] Form ({i}) in {url}{RESET}")
                 self.fuzz(url, form)
                 
 
@@ -116,6 +126,21 @@ class Injection:
     
     # https://stackoverflow.com/questions/2506379/add-params-to-given-url-in-python
     def add_url_params(self, url, params={}):
+        url_parts = list(urlparse(url))
+        query = dict(parse_qsl(url_parts[4]))  # query = url_parts.query
+        query.update(params)
+
+        s = ""
+        for i, item in enumerate(query.items()):
+            key, value = item
+            if i :
+                s += '&'
+            s += f"{key}={value}"
+
+        url_parts[4] = s # urlencode(query)
+        return urlunparse(url_parts)
+
+    def add_url_params_encoded(self, url, params={}):
         url_parts = list(urlparse(url))
         query = dict(parse_qsl(url_parts[4]))  # query = url_parts.query
         query.update(params)
