@@ -1,0 +1,3 @@
+;touch Wuzzer.txt
+|touch Wuzzer.txt
+&&touch Wuzzer.txt
