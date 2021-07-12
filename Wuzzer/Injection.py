@@ -5,6 +5,7 @@ import requests
 import random
 from bs4 import BeautifulSoup
 import colorama
+import pandas 
 try:
     import urlparse
     from urllib import urlencode
@@ -24,9 +25,8 @@ class Injection:
 
     def __init__(self, session, urls, attack):
         self.session = session
-        self.urls = urls
+        self.urls = list(urls)
         self.attack = attack
-        print(f"{attack}")
 
     def PrintErr(self, err_msg, payload, url):
         print( f"{RED} \tError :  {err_msg} {RESET}")
@@ -41,26 +41,42 @@ class Injection:
 
         formInputs = form.find_all('input')
         formSelects = form.find_all('select')
-        formInputs = formInputs + formSelects
+        formTextarea = form.find_all('textarea')
+        formInputs = formInputs + formSelects + formTextarea
 
         href = urljoin(url, formAction) 
         print(f"\thref = {href}")
 
-        params={}
+        params = pandas.DataFrame(columns = ['type', 'name', 'value'])
+                        
+        SubmitExistence = False
+        Cnt = 0
         for j, formInput in enumerate(formInputs):
-            inputType = formInput.get('type') 
-            inputName = formInput.get('name')
-            inputValue = formInput.get('value')
+            
+            tmptype  = formInput.get('type') 
+            tmpname  = formInput.get('name')
+            tmpvalue = formInput.get('value')
 
-            if inputType in ['submit', 'hidden']:
-                params[inputName] = inputValue
-            elif inputName != None:
-                params[inputName] = ''
-        
-        for inputName, inputValue in params.items():
-            if not inputValue:
-                self.PayloadInjection(self, params, inputName, href, formMethod)
+            if tmptype == 'submit':
+                if SubmitExistence == False:
+                    params.loc[Cnt] = [tmptype, tmpname, tmpvalue]
+                    SubmitExistence = True
+                    Cnt += 1
 
+                else: continue
+
+            elif tmptype == 'hidden':
+                params.loc[Cnt] = [tmptype, tmpname, tmpvalue]
+                Cnt += 1
+
+            elif tmpname != None:
+                params.loc[Cnt] = [tmptype, tmpname, '']
+                Cnt += 1
+
+        for i in range(len(params)):
+            if not params.loc[i, 'value']:
+                fault = self.PayloadInjection(params, i, url, href, formMethod)
+                if fault: return
 
     def Fuzzer(self):
         for url in self.urls :
@@ -107,7 +123,7 @@ class Injection:
         return urlunparse(url_parts)
 
     def PayloadInjection(self, *arg):
-	pass
+        pass
 
     def CheckFault(self, *arg):
         pass
