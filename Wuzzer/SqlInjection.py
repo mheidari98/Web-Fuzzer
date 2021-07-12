@@ -4,7 +4,10 @@ import re
 class SqlInjection(Injection):
     def __init__(self, session, payloadPath, urls):
         super().__init__(session, urls, "SQL Injection")
-        self.payloads = self.Get_payloads(payloadPath)
+        if payloadPath:
+            self.payloads = self.Get_payloads(payloadPath)
+        else : 
+            self.payloads  = self.Get_payloads('payload/sqli_min.txt')
 
     def CheckFault(self, payload, response_html_doc):
         err_list = ['syntax']
