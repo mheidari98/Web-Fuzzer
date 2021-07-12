@@ -13,6 +13,9 @@
 
 from Crawler import *
 from XssInjection import *
+from CmdInjection import *
+from BlindCmdInjection import *
+from SqlInjection import *
 
 def Login(session, login_url, payload, isDVWA = False):
     r = session.get(login_url)
