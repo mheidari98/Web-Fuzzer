@@ -10,9 +10,8 @@ class CmdInjection(Injection):
         injected_file = re.search(' (.*\.txt)', payload)
         return injected_file.group(1) in response_html_doc 
 
-    def PayloadInjection(self, params, inputName, href, formMethod):
-
-	for payload in self.payloads:
+    def PayloadInjection(self, params, inputName, url, href, formMethod):
+        for payload in self.payloads:
             paramsCopy = params
             paramsCopy[inputName] = payload
             #new_URL = add_url_params(href, params)
@@ -24,6 +23,6 @@ class CmdInjection(Injection):
                 response_html_doc = self.send_request(href, paramsCopy, formMethod)
                 fault = self.CheckFault(payload, response_html_doc)
                 if fault: 
-                    PrintErr(self, "Cmd Injection", payload, href)
+                    self.PrintErr("Cmd Injection", payload, href)
                     return True
         return False
