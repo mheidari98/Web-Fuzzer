@@ -11,7 +11,6 @@
 
 import re
 import requests
-import os
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 import urllib
@@ -21,6 +20,7 @@ import random
 from stem.control import Controller
 from stem import Signal
 import sys
+import os
 
 # init the colorama module
 colorama.init()
@@ -31,12 +31,12 @@ YELLOW = colorama.Fore.YELLOW
 
 class Crawler:
 
-    def __init__(self, Session, url, loginURL, logoutURL):
+    def __init__(self, Session, url, loginURL, avoidURLS):
         self.Session = Session
 
         self.url = url
         self.loginURL = loginURL
-        self.logoutURL = logoutURL
+        self.avoidURLS = avoidURLS
 
         # initialize the set of links (unique links)
         self.internal_urls = set()
@@ -44,7 +44,9 @@ class Crawler:
         self.total_urls_visited = 0
         
         self.internal_urls.add(loginURL)
-        self.internal_urls.add(logoutURL)
+        for avoid_url in self.avoidURLS:
+            self.internal_urls.add(avoid_url)
+        os.system('mkdir Crawled')
 
     def is_valid(self, url):
         """
@@ -78,12 +80,9 @@ class Crawler:
         else :
             r =  self.Session.get(url, allow_redirects=True)
             html_doc = r.text  # r.content    r.text
-        
-
-        
+       
         soup = BeautifulSoup( html_doc , "html5lib")  # 'html5lib' , 'html.parser'  'lxml'
-        
-        
+
         #for link in soup.find_all(attrs={'href': re.compile("http")}):
         for link in soup.find_all('a', href=True):
             
@@ -95,7 +94,6 @@ class Crawler:
             href = urljoin(url, href)      # join the URL if it's relative (not absolute link)
             
             parsed_href = urlparse(href)
-            
             
             href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path  # remove URL GET parameters, URL fragments, etc.
             
@@ -148,10 +146,6 @@ class Crawler:
         print("[+] Total crawled URLs:", max_urls)
 
         domain_name = urlparse(self.url).netloc
-
-        # https://stackoverflow.com/questions/273192
-        os.makedirs("Crawled", exist_ok=True) 
-
         # save the internal links to a file
         with open(f"Crawled/{domain_name}_internal_links.txt", "w") as f:
             for internal_link in self.internal_urls:
@@ -162,4 +156,7 @@ class Crawler:
             for external_link in self.external_urls:
                 print(external_link.strip(), file=f)
 
-        return self.internal_urls - {self.loginURL, self.logoutURL}
+        self.internal_urls.remove(self.loginURL)
+        for avoid_url in self.avoidURLS:
+            self.internal_urls.remove(avoid_url)
+        return self.internal_urls
