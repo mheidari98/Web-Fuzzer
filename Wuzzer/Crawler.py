@@ -144,7 +144,8 @@ class Crawler:
         print("[+] Total External links:", len(self.external_urls))
         print("[+] Total URLs:", len(self.external_urls) + len(self.internal_urls))
         print("[+] Total crawled URLs:", max_urls)
-
+        print()
+        
         domain_name = urlparse(self.url).netloc
         # save the internal links to a file
         with open(f"Crawled/{domain_name}_internal_links.txt", "w") as f:
