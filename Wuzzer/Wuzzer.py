@@ -13,9 +13,9 @@
 
 from Crawler import *
 from XssInjection import *
+from SqlInjection import *
 from CmdInjection import *
 from BlindCmdInjection import *
-from SqlInjection import *
 
 def Login(session, login_url, payload, isDVWA = False):
     r = session.get(login_url)
@@ -35,18 +35,18 @@ def Login(session, login_url, payload, isDVWA = False):
     p = session.post(login_url, data=payload)
     return p.url
 
-def Session_Creator(login_url, payload={}):
+def Session_Creator(login_url, payload={}, isDVWA = False):
     s = requests.session()
     # s.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36"
-    protected_url = Login(s, login_url, payload)
+    protected_url = Login(s, login_url, payload, isDVWA)
     return (s, protected_url)
 
 
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Simple Web Fuzzer")
-    parser.add_argument("-i", "--login", help="login page url")
-    parser.add_argument("-o", "--logout", help="logout page url")
+    parser.add_argument("--login", help="login page url")
+    parser.add_argument('--avoid', nargs='*', help='avoid urls')
     parser.add_argument("-u", "--username", help="username")
     parser.add_argument("-p", "--password", help="password")
     parser.add_argument("-t", "--thread", help="Number of thread", default=1, type=int)
@@ -61,13 +61,16 @@ def main():
     args = parser.parse_args()
 
     loginURL  = args.login
-    logoutURL  = args.logout
+    avoidURL  = args.avoid
     thread = args.thread
     max_urls = args.maxUrl 
 
     if args.test :
         loginURL  = "http://127.0.0.1/login.php"
-        logoutURL = "http://127.0.0.1/logout.php"
+        avoidURL = ["http://127.0.0.1/logout.php", "http://127.0.0.1/security.php",
+                    "http://127.0.0.1/setup.php", "http://127.0.0.1/vulnerabilities/csrf/",
+                    'http://127.0.0.1/reset.php', 'http://127.0.0.1/security_level_set.php','http://127.0.0.1/password_change.php','http://127.0.0.1/user_extra.php'
+                    ]
 
     username = args.username if args.username else 'admin'
     password = args.password if args.password else 'password'
@@ -78,18 +81,25 @@ def main():
         'password': password,
         'Login': 'Login'
     }
+    payload = {
+        'login':'bee',
+        'password':'bug',
+        'security_level':'0',
+        'form':'submit'
+    }
 
-    Session, protectedURL = Session_Creator(loginURL, payload)
+    Session, protectedURL = Session_Creator(loginURL, payload, args.test)
 
-    internal_urls = Crawler(Session, protectedURL, loginURL, logoutURL).crawl(max_urls, DynamicSite=0, verbose=False)
+    #internal_urls = Crawler(Session, protectedURL, loginURL, avoidURL).crawl(max_urls, DynamicSite=0, verbose=False)
+    internal_urls =['http://127.0.0.1/xss_get.php', 'http://127.0.0.1/xss_post.php']
 
     #print(internal_urls)
     if args.XSSi :
         XssInjection(Session, args.XSSpayload, internal_urls).Fuzzer()
     if args.SQLi :
-        XssInjection(Session, args.SQLpayload, internal_urls).Fuzzer()
+        SqlInjection(Session, args.SQLpayload, internal_urls).Fuzzer()
     if args.CMDi :
-        XssInjection(Session, args.CMDpayload, internal_urls).Fuzzer()
-    
+        BlindCmdInjection(Session, args.CMDpayload, internal_urls, 0.5).Fuzzer()
+
 if __name__ == '__main__':
     main()
