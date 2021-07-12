@@ -4,14 +4,17 @@ from threading import Thread
 import socket   
 import os
 
-
 class BlindCmdInjection(Injection):
     def __init__(self, session, payloadPath, urls, threshold, port=8088):
         super().__init__(session, urls, "Blind Cmd Injection")
-        self.payloads = self.Get_payloads(payloadPath)
+        if payloadPath:
+            self.payloads = self.Get_payloads(payloadPath)
+        else : 
+            self.payloads  = self.Get_payloads('payload/bcmdi_min.txt')
         self.threshold = threshold
-        self.ip = socket.gethostbyname(socket.gethostname()) 
-        self.port = port
+        #self.ip = socket.gethostbyname(socket.gethostname()) 
+        #self.port = port
+
     def CheckFault(self, start, end, random_time):
 
         t_time = end - start  
