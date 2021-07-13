@@ -35,7 +35,7 @@ class BlindCmdInjection(Injection):
             end = time.time()
             fault = self.CheckFault(start, end, random_time)
             if fault: 
-                self.PrintErr("Blind Cmd Injection", payload, href)
+                self.PrintErr("Blind Command Injection", href, params.loc[selected_input, 'name'], payload)
                 return True
         #Thread(target = os.system('nc -vv -l -p ' + str(self.port))).start() 
         return False
