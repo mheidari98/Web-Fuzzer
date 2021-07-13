@@ -69,7 +69,7 @@ class XssInjection(Injection):
                     return True
  
             elif formMethod.upper() == 'POST':
-                print(params, selected_input)
+                #print(params, selected_input)
                 inputname = params.loc[selected_input, 'name']
                 inputbox = self.driver.find_element_by_name(inputname)
 
