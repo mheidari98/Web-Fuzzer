@@ -100,6 +100,8 @@ class Injection:
                 
 
     def send_request(self, url, payload, method):
+        #self.session.cookies.set('security', 'medium', path='')
+        #print(self.session.cookies.get_dict())
         if method.upper()  == "GET":
             #res = self.session.get( add_url_params(href, params) )
             res = self.session.get(url, params=payload, allow_redirects=False)
