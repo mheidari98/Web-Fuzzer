@@ -72,10 +72,10 @@ def main():
     max_urls = args.maxUrl 
 
     if args.test :
-        loginURL  = "http://127.0.0.1/dvwa/login.php"
+        loginURL  = "http://127.0.0.1/login.php"
 
-        avoidURL = ["http://127.0.0.1/dvwa/logout.php", "http://127.0.0.1/dvwa/security.php",
-                    "http://127.0.0.1/dvwa/setup.php", "http://127.0.0.1/dvwa/vulnerabilities/csrf/",
+        avoidURL = ["http://127.0.0.1/logout.php", "http://127.0.0.1/security.php",
+                    "http://127.0.0.1/setup.php", "http://127.0.0.1/vulnerabilities/csrf/",
                     ]
 
     username = args.username if args.username else 'admin'
