@@ -16,11 +16,13 @@ from XssInjection import *
 from SqlInjection import *
 from CmdInjection import *
 from BlindCmdInjection import *
+from BlindSqlInjection import *
 
 def Login(session, login_url, payload, isDVWA = False):
     r = session.get(login_url)
 
     if isDVWA :
+        print('DVWA Setting')
         session.cookies.set('security', 'low', domain=urlparse(login_url).netloc, path='')
     
     signin = BeautifulSoup( r.content , "html5lib")
@@ -51,12 +53,16 @@ def main():
     parser.add_argument("-p", "--password", help="password")
     parser.add_argument("-t", "--thread", help="Number of thread", default=1, type=int)
     parser.add_argument("-mu", "--maxUrl", help="Number of max URLs to crawl, default is 30.", default=30, type=int)
-    parser.add_argument('-x', '--XSSi', help="Xss injecyion attack", action='store_true', default=False)
-    parser.add_argument('-xp', '--XSSpayload', help="Xss injecyion payload path")
-    parser.add_argument('-s', '--SQLi', help="SQL injecyion attack", action='store_true', default=False)
-    parser.add_argument('-sp', '--SQLpayload', help="SQL injecyion payload path")
-    parser.add_argument('-c', '--CMDi', help="Command injecyion attack", action='store_true', default=False)
-    parser.add_argument('-cp', '--CMDpayload', help="Command injecyion payload path")
+    parser.add_argument('-x', '--XSSi', help="Xss injection attack", action='store_true', default=False)
+    parser.add_argument('-xp', '--XSSpayload', help="Xss injection payload path")
+    parser.add_argument('-s', '--SQLi', help="SQL injection attack", action='store_true', default=False)
+    parser.add_argument('-bs', '--BSQLi', help="Blind SQL injection attack", action='store_true', default=False)
+    parser.add_argument('-sp', '--SQLpayload', help="SQL injection payload path")
+    parser.add_argument('-bsp', '--BlindSQLpayload', help="Blind SQL injection payload path")
+    parser.add_argument('-c', '--CMDi', help="Command injection attack", action='store_true', default=False)
+    parser.add_argument('-bc', '--BCMDi', help="Blind Command injection attack", action='store_true', default=False)
+    parser.add_argument('-cp', '--CMDpayload', help="Command injection payload path")
+    parser.add_argument('-bcp', '--BCMDpayload', help="Blind Command injection payload path")
     parser.add_argument('--test', help="test on DVWA", action='store_true', default=False)
     args = parser.parse_args()
 
@@ -66,10 +72,10 @@ def main():
     max_urls = args.maxUrl 
 
     if args.test :
-        loginURL  = "http://127.0.0.1/login.php"
-        avoidURL = ["http://127.0.0.1/logout.php", "http://127.0.0.1/security.php",
-                    "http://127.0.0.1/setup.php", "http://127.0.0.1/vulnerabilities/csrf/",
-                    'http://127.0.0.1/reset.php', 'http://127.0.0.1/security_level_set.php','http://127.0.0.1/password_change.php','http://127.0.0.1/user_extra.php'
+        loginURL  = "http://127.0.0.1/dvwa/login.php"
+
+        avoidURL = ["http://127.0.0.1/dvwa/logout.php", "http://127.0.0.1/dvwa/security.php",
+                    "http://127.0.0.1/dvwa/setup.php", "http://127.0.0.1/dvwa/vulnerabilities/csrf/",
                     ]
 
     username = args.username if args.username else 'admin'
@@ -81,25 +87,22 @@ def main():
         'password': password,
         'Login': 'Login'
     }
-    payload = {
-        'login':'bee',
-        'password':'bug',
-        'security_level':'0',
-        'form':'submit'
-    }
 
     Session, protectedURL = Session_Creator(loginURL, payload, args.test)
 
-    #internal_urls = Crawler(Session, protectedURL, loginURL, avoidURL).crawl(max_urls, DynamicSite=0, verbose=False)
-    internal_urls =['http://127.0.0.1/xss_get.php', 'http://127.0.0.1/xss_post.php']
+    internal_urls = Crawler(Session, protectedURL, loginURL, avoidURL).crawl(max_urls, DynamicSite=0, verbose=False)
+    #internal_urls =['http://127.0.0.1/xss_get.php', 'http://127.0.0.1/xss_post.php']
 
     #print(internal_urls)
     if args.XSSi :
         XssInjection(Session, args.XSSpayload, internal_urls).Fuzzer()
     if args.SQLi :
         SqlInjection(Session, args.SQLpayload, internal_urls).Fuzzer()
+    if args.BSQLi :
+        BlindSqlInjection(Session, args.SQLpayload, internal_urls, 5).Fuzzer()
     if args.CMDi :
-        BlindCmdInjection(Session, args.CMDpayload, internal_urls, 0.5).Fuzzer()
-
+        CmdInjection(Session, args.CMDpayload, internal_urls).Fuzzer()
+    if args.BCMDi :
+        BlindCmdInjection(Session, args.BCMDpayload, internal_urls, 0.5).Fuzzer()
 if __name__ == '__main__':
     main()
