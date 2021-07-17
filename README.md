@@ -60,6 +60,23 @@
 ### Vulnerable Web Applications
 * OWASP Vulnerable Web Applications Directory ([github](https://github.com/OWASP/OWASP-VWAD)) ([owasp](https://owasp.org/www-project-vulnerable-web-applications-directory/))
 * Web vulnerability collection ([github](https://github.com/lotusirous/vulnwebcollection)) 
-### Payloads
-* Cheatsheet_XSS_Vectors.txt ([github](https://github.com/OlivierLaflamme/Cheatsheet-God/blob/master/Cheatsheet_XSS_Vectors.txt))
 
+### Payloads
+* Cheatsheet_XSS_Vectors.txt ([Cheatsheet-God github](https://github.com/OlivierLaflamme/Cheatsheet-God/blob/master/Cheatsheet_XSS_Vectors.txt))
+* xss_alert.txt ([PayloadsAllTheThings github](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/Intruders/xss_alert.txt))
+* SQL.txt ([wfuzz github](https://github.com/xmendez/wfuzz/blob/master/wordlist/Injections/SQL.txt))
+
+### XSS
+* Cross-site scripting (XSS) cheat sheet ([portswigger](https://portswigger.net/web-security/cross-site-scripting/cheat-sheet))
+* XSS Injection ([PayloadsAllTheThings github](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection))
+* Cross-Site Scripting (XSS) ([Resources-for-Beginner-Bug-Bounty-Hunters github](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/blob/master/assets/vulns.md#cross-site-scripting-xss))
+
+### Related work
+* Web fuzzers review ([pentestbook](https://pentestbook.six2dez.com/others/web-fuzzers-comparision))
+
+### security game
+* XSS Game By Google ([xss-game](https://xss-game.appspot.com))
+* [xssgame](https://www.xssgame.com/)
+* alert(1) to win ([alf.nu](https://alf.nu/alert1))
+* prompt(1) to win ([prompt.ml](http://prompt.ml/0))
+* prompt("sibears") to win ([xss school](http://xss.school.sibears.ru/easy/0))
