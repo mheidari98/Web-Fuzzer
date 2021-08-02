@@ -73,6 +73,8 @@
 * Cross-Site Scripting (XSS) ([Resources-for-Beginner-Bug-Bounty-Hunters github](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/blob/master/assets/vulns.md#cross-site-scripting-xss))
 
 ### Related work
+* Most advanced XSS scanner ([XSStrike](https://github.com/s0md3v/XSStrike)) 
+* Automatic SQL injection and database takeover tool ([sqlmap](https://github.com/sqlmapproject/sqlmap)) 
 * Web fuzzers review ([pentestbook](https://pentestbook.six2dez.com/others/web-fuzzers-comparision))
 
 ### security game
