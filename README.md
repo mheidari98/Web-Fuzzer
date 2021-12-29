@@ -83,3 +83,4 @@
 * alert(1) to win ([alf.nu](https://alf.nu/alert1))
 * prompt(1) to win ([prompt.ml](http://prompt.ml/0))
 * prompt("sibears") to win ([xss school](http://xss.school.sibears.ru/easy/0))
+* [xssgame by pwnfunction](https://xss.pwnfunction.com/)
