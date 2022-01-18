@@ -66,6 +66,7 @@
 * xss_alert.txt ([PayloadsAllTheThings github](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/Intruders/xss_alert.txt))
 * SQL.txt ([wfuzz github](https://github.com/xmendez/wfuzz/blob/master/wordlist/Injections/SQL.txt))
 * BlindSqli.txt ([sql-injection-payload-list github](https://github.com/payloadbox/sql-injection-payload-list/blob/master/Intruder/detect/Generic_TimeBased.txt))
+* xss-payload-list.txt ([xss-payload-list github](https://github.com/payloadbox/xss-payload-list/blob/master/Intruder/xss-payload-list.txt))
 
 ### XSS
 * Cross-site scripting (XSS) cheat sheet ([portswigger](https://portswigger.net/web-security/cross-site-scripting/cheat-sheet))
